@@ -81,7 +81,7 @@ dias_menu = st.sidebar.selectbox('¿Para cuántos días desea el menú?', [1,2,3
 def load_data():
     data_file = "https://raw.githubusercontent.com/matiasch11/menu_semanal/master/calorias_comida.csv"
     columns = ['id_items', 'Nombre', 'caloria porcion','categoria']
-    data = pd.read_csv(data_file, sep=';', header =0, names=columns, encoding='latin-1', index_col = None)
+    data = pd.read_csv(data_file, sep=';', header =0, names=columns, encoding='latin-1', index_col = 0)
     return data
 
 def load_data_link():
