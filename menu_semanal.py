@@ -421,7 +421,7 @@ if st.button('Generar Menú'):
 
     itemItemCFpredictions = uMatrixTraining.dot(itemSimilarity)/np.array([np.abs(itemSimilarity).sum(axis=1)])
 
-    itemItemCFpredictions[uMatrixTraining>=2.0] = 0.0
+    itemItemCFpredictions[uMatrixTraining>2.0] = 0.0
 
     recom = itemItemCFpredictions[[data_encuesta['user_id'].max()-1],:]
     recom = np.argsort(recom)[0][0:200]
