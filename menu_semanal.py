@@ -13,7 +13,6 @@ from fpdf import FPDF
 
 
 
-
 st.title('Genera un MENU de tu gusto y según requerimiento calórico')
 
 
@@ -21,16 +20,13 @@ image = Image.open('Metodo-plato.png')
 
 st.image(image, use_column_width=False)
 
-st.write("""
-Un plato equilibrado incluye verduras, carbohidratos y proteinas. 
-Te plantearemos un menu equilibrado que satisfaga tus gustos y tus necesidades. 
+st.write('Un plato equilibrado incluye verduras, carbohidratos y proteinas. Te plantearemos un menu equilibrado que satisfaga tus gustos y tus necesidades.') 
 
-""")
+#Solicitud de Datos Personales
 
-
-peso = st.sidebar.selectbox('Ingrese su peso en Kg', list(range(40,140)))
-altura = st.sidebar.selectbox('Ingrese su altura en cm', list(range(140,200))) 
-edad = st.sidebar.selectbox('¿Cuántos años tiene?', list(range(16,80)))
+peso = st.sidebar.selectbox('Ingrese su peso en Kg', list(range(40,200)))
+altura = st.sidebar.selectbox('Ingrese su altura en cm', list(range(140,210))) 
+edad = st.sidebar.selectbox('¿Cuántos años tiene?', list(range(16,100)))
 sexo= st.sidebar.radio('Indique su  sexo', ('Hombre', 'Mujer'))
 if sexo == 'Hombre':
     sexo= 'H'
@@ -75,7 +71,7 @@ def calculo_calorias(tmb, actividad):
 dias_menu = st.sidebar.selectbox('¿Para cuántos días desea el menú?', [1,2,3,4,5,6,7])
 
 
-
+#Procedo a cargar las bases de datos
 @st.cache
 
 def load_data():
@@ -123,7 +119,8 @@ index = list(range(len(data_encuesta.index)))
 for x in index:
     column_items_id.append(items_id[data_encuesta['comida'][x]])     
 data_encuesta['items_id'] = column_items_id
-# CONSULTAR al usuario
+
+# CONSULTAR al usuario sobre sus gustos
 
   
 st.title('Danos tu opnión sobre uno de los siguientes grupos de comidas')
@@ -150,7 +147,7 @@ elif combinacion == 'Grupo 9':
     combinacion = 9
 
 
-st.write('Siendo 0 No la he probado, 1 No me gusta, 2 Me gusta poco, 3 Me gusta mucho y 4 Me encanta')
+st.write('Siendo: 0 No la he probado, 1 No me gusta, 2 Me gusta poco, 3 Me gusta mucho y 4 Me encanta')
 
 items_id_user=[]
 for c in range(20):
@@ -208,15 +205,14 @@ data_encuesta = data_encuesta.append(df_user, ignore_index=True)
 n_users = data_encuesta.user_id.unique().shape[0]
 n_items = data_encuesta.comida.unique().shape[0]
 
-#####
-
-
+#Genero el Menu
 
 def plan_semanal(dias_menu):
-# El plan semanal constara de una comida por la mañana compuesta por un plato de 2 porciones de verduras, 
-# 1 porcion de proteinas y 1 porción de carbohidratos
-# y como cena un plato combinado         
-    
+"""
+    El plan semanal constara de una comida por la mañana compuesta por un plato de 2 porciones de verduras, 
+1 porcion de proteinas y 1 porción de carbohidratos. En algunos casos las 2 porciones de verduras iran solas o acompañadas de uno de los otros platos
+Como cena un plato combinado         
+"""    
     menu_semanal = []
     dias_almuerzo = []
     almuerzos = []
@@ -359,7 +355,6 @@ def plan_semanal(dias_menu):
                     break     
         
     
-    df_almuerzos = pd.DataFrame({'Día':dias, 'Almuerzos':almuerzos, 'Recetas':link_almuerzos})
     data_pdf = []
     for a, b, c in zip(dias_almuerzo_pdf, almuerzos_pdf, link_almuerzos_pdf):
         lista = [a,b,c]
@@ -372,11 +367,20 @@ def plan_semanal(dias_menu):
     
     df_cenas = pd.DataFrame({'cenas':cenas, 'link cenas':link_cenas})    
     fig = go.Figure(data=[go.Table(columnwidth=[80,400,400],header=dict(values=['Día','Almuerzo', 'Recetas']), cells=dict(values = [dias,almuerzos,link_almuerzos], align=['center', 'left', 'left']))])
-    fig.update_layout(margin_b = 0, margin_l= 0,width=1000, height=600)
+    if dias_menu > 4:
+        fig.update_layout(margin_b = 0, margin_l= 0,width=1000, height=600)
+    elif dias_menu > 2:
+        fig.update_layout(margin_b = 0, margin_l= 0,width=1000, height=400)
+    else:
+        fig.update_layout(margin_b = 0, margin_l= 0,width=1000, height=250)
     fig_cena = go.Figure(data=[go.Table(columnwidth=[80,400,400],header=dict(values=['Día','Cena', 'Recetas']), cells=dict(values = [dias,cenas,link_cenas], align=['center', 'center', 'left']))])
-    fig_cena.update_layout(margin_t = 0, margin_l= 0, width=1000, height=400)
-    
-    return df_almuerzos, fig_cena, fig, data_pdf, data_cena_pdf
+    if dias_menu > 4:
+        fig_cena.update_layout(margin_t = 0, margin_l= 0, width=1000, height=300)
+    elif dias_menu > 2:
+        fig_cena.update_layout(margin_t = 0, margin_l= 0, width=1000, height=200)    
+    else:
+        fig_cena.update_layout(margin_t = 0, margin_l= 0, width=1000, height=150)
+    return fig_cena, fig, data_pdf, data_cena_pdf
 
 
 
@@ -388,28 +392,25 @@ def create_download_link(val, filename):
 
 
 
-#####De aqui en adelante voy a cambiar los train por data_encuesta
 
+st.write('El Menú que se  genera no reemplaza la consulta con tu nutricionista dietista.')
 if st.button('Generar Menú'):
-    
-    uMatrixTraining = np.zeros((n_users, n_items)) # utility matrix
+
+    #Genero las recomendaciones
+    uMatrixTraining = np.zeros((n_users, n_items)) 
     for row in data_encuesta.values[:,0:5]:
-        user = row[0]-1 #for use the same as index
+        user = row[0]-1 
         item = row[4]
         rating = row[1]
         uMatrixTraining[user, item] = rating    
 
     def cosineSimilarity(ratings, kind='user', epsilon=1e-9):
         """
-        Calculate the cosine distance along the row (columns) of a matrix for users (items)
-
-        :param ratings: a n_user X n_items matrix
-        :param kind: string indicating whether we are in mode 'user' or 'item'
-        :param epsilon: a small value to avoid dividing by zero (optional, defaults to 1e-9)
-
-        :return a square matrix with the similarities
+        Calcula la distancia coseno a lo largo de las fila para una matriz de usuarios y a lo largo de columnas para una matriz de items.
+    
+        Returna una matriz cuadrada de las similitudes
         """
-        # epsilon -> small number for handling dived-by-zero errors
+     
         if kind == 'user':
             sim = ratings.dot(ratings.T)+epsilon
         elif kind == 'item':
@@ -424,7 +425,7 @@ if st.button('Generar Menú'):
     itemItemCFpredictions[uMatrixTraining>2.0] = 0.0
 
     recom = itemItemCFpredictions[[data_encuesta['user_id'].max()-1],:]
-    recom = np.argsort(recom)[0][0:200]
+    recom = np.argsort(recom)[0][0:300]
 
     
     
@@ -437,13 +438,14 @@ if st.button('Generar Menú'):
     st.header('Requerimiento Calorico')
     st.write(round(calculo_calorias(calculo_tmb(peso, altura, edad, sexo), actividad)))
     calorias_comida = round(0.35 * calorias_diarias)
-    calorias_cena = round(0.28 * calorias_diarias)
+    calorias_cena = round(0.25 * calorias_diarias)
     st.write('Debes ingerir en la comida:',calorias_comida, 'calorias y en la cena:',calorias_cena, 'calorias')
     st.header('Menu Semanal')
-    df, fig_cena, fig, data_pdf, data_cena_pdf = plan_semanal(dias_menu)
+    fig_cena, fig, data_pdf, data_cena_pdf = plan_semanal(dias_menu)
 
     st.write(fig)
     st.write(fig_cena)
+    
 
 
     def export_as_pdf():    
@@ -474,13 +476,13 @@ if st.button('Generar Menú'):
                     pdf.multi_cell(col_width, 2*th, str(datum), border=1, align = 'C')   
             pdf.ln(2*th)
 
-        html = create_download_link(pdf.output(dest='S').encode('Latin-1'),"test")
+        html = create_download_link(pdf.output(dest='S').encode('Latin-1'),"Menu")
 
         return st. markdown(html, unsafe_allow_html=True)  
     
     export_as_pdf()
     
-
+    st.write("Puedes generar un menú distinto, de acuerdo a tus necesidades y gustos eligiendo otro Grupo de Comidas para informar tus gustos")
 
 
 
