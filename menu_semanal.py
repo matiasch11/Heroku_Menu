@@ -208,11 +208,11 @@ n_items = data_encuesta.comida.unique().shape[0]
 #Genero el Menu
 
 def plan_semanal(dias_menu):
-"""
+    """
     El plan semanal constara de una comida por la mañana compuesta por un plato de 2 porciones de verduras, 
-1 porcion de proteinas y 1 porción de carbohidratos. En algunos casos las 2 porciones de verduras iran solas o acompañadas de uno de los otros platos
-Como cena un plato combinado         
-"""    
+    1 porcion de proteinas y 1 porción de carbohidratos. En algunos casos las 2 porciones de verduras iran solas 
+    o acompañadas de uno de los otros platos.Como cena un plato combinado         
+    """    
     menu_semanal = []
     dias_almuerzo = []
     almuerzos = []
