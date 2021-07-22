@@ -13,7 +13,7 @@ from fpdf import FPDF
 
 
 
-st.title('Genera un MENU de tu gusto y según requerimiento calórico')
+st.title('Genera un MENU de tu gusto y según tu requerimiento calórico')
 
 
 image = Image.open('Metodo-plato.png')
@@ -23,7 +23,7 @@ st.image(image, use_column_width=False)
 st.write('Un plato equilibrado incluye verduras, carbohidratos y proteinas. Te plantearemos un menu equilibrado que satisfaga tus gustos y tus necesidades.') 
 
 #Solicitud de Datos Personales
-
+st.sidebar.title('Datos Requeridos')
 peso = st.sidebar.selectbox('Ingrese su peso en Kg', list(range(40,200)))
 altura = st.sidebar.selectbox('Ingrese su altura en cm', list(range(140,210))) 
 edad = st.sidebar.selectbox('¿Cuántos años tiene?', list(range(16,100)))
@@ -393,7 +393,7 @@ def create_download_link(val, filename):
 
 
 
-st.write('El Menú que se  genera no reemplaza la consulta con tu nutricionista dietista.')
+st.write('El Menú a generar no reemplaza la consulta con tu nutricionista dietista.')
 if st.button('Generar Menú'):
 
     #Genero las recomendaciones
